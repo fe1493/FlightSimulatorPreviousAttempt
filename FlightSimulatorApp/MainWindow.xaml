@@ -5,8 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FlightSimulatorApp"
         mc:Ignorable="d"
+        xmlns:Controls="clr-namespace:FlightSimulatorApp.Views" 
         Title="MainWindow" Height="450" Width="800">
     <Grid>
+        <Controls:Joystick x:Name="Joystick" Margin="0,0,109,80">
+            
+        </Controls:Joystick>
+        
+            
         
     </Grid>
 </Window>
