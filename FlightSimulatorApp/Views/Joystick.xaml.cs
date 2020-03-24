@@ -57,6 +57,6 @@ namespace FlightSimulatorApp.Views
             }
 
         }
+        private void centerKnob_Completed(object sender, EventArgs e) { }
     }
- //   private void CenterKnob(object sender, EventArgs e) { }
 }

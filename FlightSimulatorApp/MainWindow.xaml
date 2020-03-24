@@ -9,10 +9,7 @@
         Title="MainWindow" Height="450" Width="800">
     <Grid>
         <Controls:Joystick x:Name="Joystick" Margin="0,0,109,80">
-            
+
         </Controls:Joystick>
-        
-            
-        
     </Grid>
 </Window>
