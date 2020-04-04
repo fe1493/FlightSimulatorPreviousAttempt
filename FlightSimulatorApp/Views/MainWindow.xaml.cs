@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,6 +24,12 @@ namespace FlightSimulatorApp
         public MainWindow()
         {
             InitializeComponent();
+            DataContext = (Application.Current as App).MainViewModel;
+        }
+
+        private void Connect_Loaded(object sender, RoutedEventArgs e)
+        {
+            connect.init();
         }
     }
 }

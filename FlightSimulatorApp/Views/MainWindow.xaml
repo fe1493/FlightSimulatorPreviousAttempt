@@ -11,5 +11,6 @@
         <Controls:Joystick x:Name="Joystick" Margin="0,0,109,80">
 
         </Controls:Joystick>
+        <Controls:Connect x:Name="connect" Loaded="Connect_Loaded" />
     </Grid>
 </Window>

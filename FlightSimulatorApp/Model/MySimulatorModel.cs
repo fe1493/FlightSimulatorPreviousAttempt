@@ -3,24 +3,53 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace FlightSimulatorApp.Model
 {
-    class MySimulatorModel : ISimulatorModel
+    public class MySimulatorModel : ISimulatorModel
     {
         public event PropertyChangedEventHandler PropertyChanged;
+        MyTelnetClient telnetClient = new MyTelnetClient();
+        volatile Boolean stop;
         public void connect(string ip, int port)
         {
-
+            telnetClient.connect(ip, port);
+            stop = false;
         }
         public void disconnect()
         {
-
+            stop = true;
+            telnetClient.disconnect();
         }
         public void start()
         {
-
+            new Thread(delegate ()
+            {
+                while (!stop)
+                {
+                    // update the variables from the simluator
+                    telnetClient.write("get /instrumentation/heading-indicator/indicated-heading-deg");
+                    Indicated_heading_deg = telnetClient.read();
+                    telnetClient.write("get /instrumentation/gps/indicated-vertical-speed");
+                    Gps_indicated_vertical_speed = telnetClient.read();
+                    telnetClient.write("get /instrumentation/gps/indicated-ground-speed-kt");
+                    gps_indicated_ground_speed_kt = telnetClient.read();
+                    telnetClient.write("get /instrumentation/airspeed-indicator/indicated-speed-kt");
+                    Airspeed_indicator_indicated_speed_kt = telnetClient.read();
+                    telnetClient.write("get /instrumentation/gps/indicated-altitude-ft");
+                    Gps_indicated_altitude_ft = telnetClient.read();
+                    telnetClient.write("get /instrumentation/attitude-indicator/internal-roll-deg");
+                    Attitude_indicator_internal_roll_deg = telnetClient.read();
+                    telnetClient.write("get /instrumentation/attitude-indicator/internal-pitch-deg");
+                    Attitude_indicator_internal_pitch_deg = telnetClient.read();
+                    telnetClient.write("get /instrumentation/altimeter/indicated-altitude-ft");
+                    Altimeter_indicated_altitude_ft = telnetClient.read();
+                    // read the data in 4HZ
+                    Thread.Sleep(250);
+                }
+            }).Start();
         }
 
         public void NotifyPropertyChanged(string propName)
@@ -32,10 +61,6 @@ namespace FlightSimulatorApp.Model
         }
         // the property implementation
         // all the variables from the plane
-        private string rudder;
-        private string elevator;
-        private string aileron;
-        private string throttle;
         private string indicated_heading_deg;
         private string gps_indicated_vertical_speed;
         private string gps_indicated_ground_speed_kt;
@@ -44,39 +69,8 @@ namespace FlightSimulatorApp.Model
         private string attitude_indicator_internal_roll_deg;
         private string attitude_indicator_internal_pitch_deg;
         private string altimeter_indicated_altitude_ft;
-        public string Rudder {
-            get { return rudder; }
-            set
-            {
-                rudder = value;
-                NotifyPropertyChanged("Rudder");
-            }
-        }
-        public string Elevator {
-            get { return elevator; }
-            set
-            {
-                elevator = value;
-                NotifyPropertyChanged("Elevator");
-            }
-        }
-        public string Aileron {
-            get { return aileron; }
-            set
-            {
-                aileron = value;
-                NotifyPropertyChanged("Aileron");
-            }
-        }
-        public string Throttle {
-            get { return throttle; }
-            set
-            {
-                throttle = value;
-                NotifyPropertyChanged("Throttle");
-            }
-        }
-        public string Indicated_heading_deg {
+        public string Indicated_heading_deg
+        {
             get { return indicated_heading_deg; }
             set
             {
@@ -84,7 +78,8 @@ namespace FlightSimulatorApp.Model
                 NotifyPropertyChanged("Indicated_heading_deg");
             }
         }
-        public string Gps_indicated_vertical_speed {
+        public string Gps_indicated_vertical_speed
+        {
             get { return gps_indicated_vertical_speed; }
             set
             {
@@ -92,7 +87,8 @@ namespace FlightSimulatorApp.Model
                 NotifyPropertyChanged("Gps_indicated_vertical_speed");
             }
         }
-        public string Gps_indicated_ground_speed_kt {
+        public string Gps_indicated_ground_speed_kt
+        {
             get { return gps_indicated_ground_speed_kt; }
             set
             {
@@ -100,7 +96,8 @@ namespace FlightSimulatorApp.Model
                 NotifyPropertyChanged("Gps_indicated_ground_speed_kt");
             }
         }
-        public string Airspeed_indicator_indicated_speed_kt {
+        public string Airspeed_indicator_indicated_speed_kt
+        {
             get { return airspeed_indicator_indicated_speed_kt; }
             set
             {
@@ -108,7 +105,8 @@ namespace FlightSimulatorApp.Model
                 NotifyPropertyChanged("Airspeed_indicator_indicated_speed_kt");
             }
         }
-        public string Gps_indicated_altitude_ft {
+        public string Gps_indicated_altitude_ft
+        {
             get { return gps_indicated_altitude_ft; }
             set
             {
@@ -116,7 +114,8 @@ namespace FlightSimulatorApp.Model
                 NotifyPropertyChanged("Gps_indicated_altitude_ft");
             }
         }
-        public string Attitude_indicator_internal_roll_deg {
+        public string Attitude_indicator_internal_roll_deg
+        {
             get { return attitude_indicator_internal_roll_deg; }
             set
             {
@@ -124,7 +123,8 @@ namespace FlightSimulatorApp.Model
                 NotifyPropertyChanged("Attitude_indicator_internal_roll_deg");
             }
         }
-        public string Attitude_indicator_internal_pitch_deg {
+        public string Attitude_indicator_internal_pitch_deg
+        {
             get { return attitude_indicator_internal_pitch_deg; }
             set
             {
@@ -132,13 +132,34 @@ namespace FlightSimulatorApp.Model
                 NotifyPropertyChanged("Attitude_indicator_internal_pitch_deg");
             }
         }
-        public string Altimeter_indicated_altitude_ft {
+        public string Altimeter_indicated_altitude_ft
+        {
             get { return altimeter_indicated_altitude_ft; }
             set
             {
                 altimeter_indicated_altitude_ft = value;
                 NotifyPropertyChanged("Altimeter_indicated_altitude_ft");
             }
+        }
+        public void setThrottle(string s)
+        {
+            string toSend = "set" + "/controls/engines/current-engine/throttle" + s;
+            telnetClient.write(toSend);
+        }
+        public void setRudder(string s)
+        {
+            string toSend = "set" + "/controls/flight/rudder" + s;
+            telnetClient.write(toSend);
+        }
+        public void setElevator(string s)
+        {
+            string toSend = "set" + "/controls/flight/elevator" + s;
+            telnetClient.write(toSend);
+        }
+        public void setAileron(string s)
+        {
+            string toSend = "set" + "/controls/flight/aileron" + s;
+            telnetClient.write(toSend);
         }
     }
 }
